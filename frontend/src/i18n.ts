@@ -242,3 +242,4 @@ export const getTranslation = (lang: Language): Translations => {
   return translations[lang]
 }
 
+
