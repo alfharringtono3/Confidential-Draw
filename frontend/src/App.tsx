@@ -3,8 +3,8 @@ import { ethers } from 'ethers'
 import type { FhevmInstance } from './types/fhevm'
 import { SepoliaConfig, getSDK } from './types/fhevm'
 import './App.css'
-import { CONTRACT_ABI } from './contract-abi.ts'
-import { Language, getTranslation } from './i18n.ts'
+import { CONTRACT_ABI } from './contract-abi'
+import { Language, getTranslation } from './i18n'
 
 // 合约地址
 const CONTRACT_ADDRESS = "0x98002AB8529Df26C1ebC877D4ebDD1BfeA6Fd45d"
