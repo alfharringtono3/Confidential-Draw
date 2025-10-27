@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🎰 保密彩票 - Confidential Lottery</title>
+    <!-- 确保 emoji 字体正确渲染 -->
+    <style>
+      /* 预加载 emoji 字体以防止渲染延迟 */
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+      }
+      .emoji-preload {
+        font-family: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif;
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+      }
+    </style>
+    <!-- 预渲染一个隐藏的 emoji 来触发字体加载 -->
+    <div class="emoji-preload">🎰🎊💪🔄</div>
+    <!-- 使用 UMD 方式加载 Zama FHE SDK -->
+    <script
+      src="https://cdn.zama.ai/relayer-sdk-js/0.2.0/relayer-sdk-js.umd.cjs"
+      type="text/javascript"
+      onload="console.log('✅ FHE SDK UMD 脚本加载成功'); console.log('window 全局对象:', Object.keys(window).filter(k => !k.startsWith('webkit')).slice(0, 50));"
+      onerror="console.error('❌ FHE SDK UMD 脚本加载失败！'); console.error('CDN URL 可能无法访问:', this.src);"
+    ></script>
+    <script>
+      // 监控 SDK 加载状态
+      window.addEventListener('DOMContentLoaded', function() {
+        console.log('=== SDK 加载状态检查 (DOMContentLoaded) ===');
+        console.log('window.initSDK:', typeof window.initSDK);
+        console.log('window.createInstance:', typeof window.createInstance);
+        
+        // 检查所有可能的全局对象
+        const possibleNames = ['initSDK', 'createInstance', 'fhevmSDK', 'zamaSDK', 'RelayerSDK'];
+        possibleNames.forEach(name => {
+          if (window[name]) {
+            console.log(`找到全局对象: window.${name}`, typeof window[name]);
+          }
+        });
+        
+        // 显示所有非标准的 window 属性
+        const standardProps = ['location', 'document', 'navigator', 'console', 'localStorage'];
+        const customProps = Object.keys(window).filter(k => 
+          !k.startsWith('webkit') && 
+          !k.startsWith('chrome') && 
+          !k.startsWith('on') && 
+          !standardProps.includes(k)
+        );
+        console.log('自定义 window 属性:', customProps.slice(0, 30));
+      });
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

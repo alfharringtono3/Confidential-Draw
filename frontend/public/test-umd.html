@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UMD SDK 加载测试</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .test-item {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 10px;
+      font-family: 'Courier New', monospace;
+    }
+    .success {
+      color: #4ade80;
+    }
+    .error {
+      color: #f87171;
+    }
+    .warning {
+      color: #fbbf24;
+    }
+    pre {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 10px 0;
+    }
+    button {
+      background: #4ade80;
+      color: #000;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      margin: 10px 5px;
+      transition: all 0.3s;
+    }
+    button:hover {
+      background: #22c55e;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(74, 222, 128, 0.4);
+    }
+    button:disabled {
+      background: #6b7280;
+      cursor: not-allowed;
+      transform: none;
+    }
+  </style>
+  
+  <!-- 加载 Zama FHE SDK (UMD) -->
+  <script
+    src="https://cdn.zama.ai/relayer-sdk-js/0.2.0/relayer-sdk-js.umd.cjs"
+    type="text/javascript"
+    onload="console.log('✅ SDK 脚本加载成功')"
+    onerror="console.error('❌ SDK 脚本加载失败')"
+  ></script>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 Zama FHE SDK UMD 加载测试</h1>
+    
+    <div id="results"></div>
+    
+    <div style="text-align: center; margin-top: 30px;">
+      <button onclick="runTests()">🚀 运行测试</button>
+      <button onclick="location.reload()">🔄 刷新页面</button>
+    </div>
+  </div>
+
+  <script>
+    const resultsDiv = document.getElementById('results');
+
+    function addResult(title, content, type = 'info') {
+      const className = type === 'success' ? 'success' : type === 'error' ? 'error' : type === 'warning' ? 'warning' : '';
+      const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : '📝';
+      
+      resultsDiv.innerHTML += `
+        <div class="test-item ${className}">
+          <strong>${icon} ${title}</strong>
+          <pre>${content}</pre>
+        </div>
+      `;
+    }
+
+    function runTests() {
+      resultsDiv.innerHTML = '';
+      
+      console.log('=== 开始 UMD SDK 测试 ===');
+      
+      // 测试 1: 检查所有可能的全局对象
+      addResult('测试 1: 检查全局对象', '搜索所有可能的 SDK 相关全局变量...');
+      
+      const possibleNames = [
+        'zamaRelayerSDK',
+        'relayerSDK', 
+        'ZamaRelayerSDK',
+        'RelayerSDK',
+        'initSDK',
+        'createInstance'
+      ];
+      
+      let foundNames = [];
+      possibleNames.forEach(name => {
+        if (window[name]) {
+          foundNames.push(`window.${name} (${typeof window[name]})`);
+          console.log(`✅ 找到: window.${name}`, window[name]);
+        }
+      });
+      
+      if (foundNames.length > 0) {
+        addResult('找到的全局对象', foundNames.join('\n'), 'success');
+      } else {
+        addResult('未找到任何 SDK 相关全局对象', '这是个问题！', 'error');
+      }
+      
+      // 测试 2: 列出所有 SDK 相关的全局变量
+      const allSDKVars = Object.keys(window).filter(k => 
+        k.toLowerCase().includes('sdk') || 
+        k.toLowerCase().includes('zama') ||
+        k.toLowerCase().includes('relayer') ||
+        k.toLowerCase().includes('fhe')
+      );
+      
+      if (allSDKVars.length > 0) {
+        addResult('所有 SDK/Zama 相关全局变量', allSDKVars.join('\n'), 'info');
+      }
+      
+      // 测试 3: 尝试获取 SDK 对象
+      addResult('测试 3: 智能获取 SDK', '尝试多个可能的名称...');
+      
+      let sdk = null;
+      const tryNames = ['zamaRelayerSDK', 'relayerSDK', 'ZamaRelayerSDK', 'RelayerSDK'];
+      
+      for (const name of tryNames) {
+        if (window[name] && typeof window[name] === 'object') {
+          sdk = window[name];
+          addResult('✅ 找到 SDK 对象', `window.${name}`, 'success');
+          console.log('SDK 对象详情:', sdk);
+          break;
+        }
+      }
+      
+      if (!sdk) {
+        // 尝试直接挂载的函数
+        if (typeof window.initSDK === 'function' && typeof window.createInstance === 'function') {
+          sdk = {
+            initSDK: window.initSDK,
+            createInstance: window.createInstance
+          };
+          addResult('✅ 找到直接挂载的函数', 'window.initSDK 和 window.createInstance', 'success');
+        }
+      }
+      
+      if (!sdk) {
+        addResult('❌ 未找到 SDK', 'UMD 脚本可能未正确加载或全局变量名不匹配', 'error');
+        return;
+      }
+      
+      // 测试 4: 检查 SDK 方法
+      addResult('测试 4: 检查 SDK 方法', '验证必需的方法...');
+      
+      const methods = ['initSDK', 'createInstance', 'SepoliaConfig'];
+      const foundMethods = [];
+      const missingMethods = [];
+      
+      methods.forEach(method => {
+        if (sdk[method]) {
+          foundMethods.push(`${method}: ${typeof sdk[method]}`);
+          console.log(`✅ ${method}:`, sdk[method]);
+        } else {
+          missingMethods.push(method);
+        }
+      });
+      
+      if (foundMethods.length > 0) {
+        addResult('找到的方法', foundMethods.join('\n'), 'success');
+      }
+      
+      if (missingMethods.length > 0) {
+        addResult('缺失的方法', missingMethods.join('\n'), 'warning');
+      }
+      
+      // 测试 5: 显示 SDK 完整结构
+      addResult('测试 5: SDK 对象结构', JSON.stringify(Object.keys(sdk), null, 2));
+      
+      // 总结
+      if (sdk.initSDK && sdk.createInstance) {
+        addResult(
+          '🎉 测试通过！', 
+          'SDK 已正确加载，可以在应用中使用\n\n使用方法：\nconst sdk = window.zamaRelayerSDK (或其他找到的名称)\nawait sdk.initSDK()\nconst instance = await sdk.createInstance(config)',
+          'success'
+        );
+      } else {
+        addResult(
+          '⚠️ SDK 不完整',
+          '找到了全局对象，但缺少必需的方法\n请检查 CDN 地址和版本',
+          'warning'
+        );
+      }
+    }
+    
+    // 页面加载完成后自动运行测试
+    window.addEventListener('DOMContentLoaded', () => {
+      console.log('页面加载完成，准备测试...');
+      setTimeout(runTests, 100);
+    });
+  </script>
+</body>
+</html>
+
